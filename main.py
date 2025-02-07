@@ -65,7 +65,7 @@ spamuser = KeyboardButton('Юзерам')
 back = KeyboardButton('Назад')
 spammenu.row(spamworker, spamuser).add(back)
 
-cancel = types.ReplyKeyboardMarkup(resize_keyboard=True)
+await dp.start_polling(bot, skip_updates=True, drop_pending_updates=True)
 cancel.add(types.InlineKeyboardButton(text='Назад'))
 
 panel = ReplyKeyboardMarkup(resize_keyboard=True)
