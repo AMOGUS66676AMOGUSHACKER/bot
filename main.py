@@ -24,11 +24,8 @@ def run_flask():
     app.run(host="0.0.0.0", port=10000)
 
 async def main():
-    bot = Bot(token=TOKEN)
-    dp = Dispatcher()
-
+    threading.Thread(target=run_flask, daemon=True).start()  # Запускаем фейковый сервер
     print("Бот запущен...")
-    
     await dp.start_polling(bot, skip_updates=True, drop_pending_updates=True)
 storage = MemoryStorage()
 
