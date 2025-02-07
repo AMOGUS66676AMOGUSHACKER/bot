@@ -15,7 +15,13 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 
 logging.basicConfig(level=logging.INFO)
+async def main():
+    bot = Bot(token=TOKEN)
+    dp = Dispatcher()
 
+    print("Бот запущен...")
+    
+    await dp.start_polling(bot, skip_updates=True, drop_pending_updates=True)
 storage = MemoryStorage()
 
 TOKEN = '7504404671:AAHblv3vK8wUz3Pb5EY_sDXnKKY1ennrCqU' #токен бота
@@ -65,7 +71,6 @@ spamuser = KeyboardButton('Юзерам')
 back = KeyboardButton('Назад')
 spammenu.row(spamworker, spamuser).add(back)
 
-await dp.start_polling(bot, skip_updates=True, drop_pending_updates=True)
 cancel.add(types.InlineKeyboardButton(text='Назад'))
 
 panel = ReplyKeyboardMarkup(resize_keyboard=True)
