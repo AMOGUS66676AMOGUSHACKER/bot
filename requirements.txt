@@ -1,2 +1,3 @@
 aiogram
 validate-email-address
+email-validator
