@@ -2,3 +2,4 @@ validate-email-address
 email-validator
 validate-email
 aiogram==2.25.1
+Flask
