@@ -1,6 +1,7 @@
 import sqlite3
 import logging
 import re
+from flask import Flask
 from validate_email_address import validate_email as ve
 from validate_email import validate_email
 from validate_email_address import validate_email
