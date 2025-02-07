@@ -15,6 +15,14 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 
 logging.basicConfig(level=logging.INFO)
+
+@app.route('/')
+def home():
+    return "Бот работает!"
+
+def run_flask():
+    app.run(host="0.0.0.0", port=10000)
+
 async def main():
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
