@@ -1,9 +1,9 @@
 import sqlite3
 import logging
 import re
-
+from validate_email_address import validate_email as ve
 from validate_email import validate_email
-
+from validate_email_address import validate_email
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import Message
 from aiogram.types import ReplyKeyboardRemove, \
