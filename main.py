@@ -70,7 +70,7 @@ spamworker = KeyboardButton('Воркерам')
 spamuser = KeyboardButton('Юзерам')
 back = KeyboardButton('Назад')
 spammenu.row(spamworker, spamuser).add(back)
-
+cancel = types.InlineKeyboardMarkup()
 cancel.add(types.InlineKeyboardButton(text='Назад'))
 
 panel = ReplyKeyboardMarkup(resize_keyboard=True)
