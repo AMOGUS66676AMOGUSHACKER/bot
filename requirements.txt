@@ -1,0 +1,2 @@
+aiogram
+validate-email-address
