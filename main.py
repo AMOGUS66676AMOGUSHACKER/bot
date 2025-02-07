@@ -16,7 +16,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
-
+await dp.start_polling(bot, skip_updates=True, drop_pending_updates=True)
 @app.route('/')
 def home():
     return "Бот работает!"
