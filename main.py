@@ -38,6 +38,7 @@ dp.middleware.setup(LoggingMiddleware())
 
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
+
 class dialog(StatesGroup):
     spamworker = State()
     spamuser = State()
@@ -58,11 +59,7 @@ class entr(StatesGroup):
 
 class code(StatesGroup):
     entr = State()
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# Создаём клавиатуру "Отмена"
-cancel = InlineKeyboardMarkup()
-cancel.add(InlineKeyboardButton(text="❌ Отмена", callback_data="cancel"))
 menu = ReplyKeyboardMarkup(resize_keyboard=True)
 button1 = KeyboardButton('Забанить')
 button2 = KeyboardButton('Разбанить')
@@ -73,16 +70,8 @@ menu.row(button1, button2)
 menu.add(button3)
 menu.row(button4, button5)
 
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
 cancel = InlineKeyboardMarkup()
-spamworker = KeyboardButton('Воркерам🧠')
+spamworker = KeyboardButton('Воркерам')
 spamuser = KeyboardButton('Юзерам')
 back = KeyboardButton('Назад')
 spammenu.row(spamworker, spamuser).add(back)
