@@ -69,13 +69,12 @@ button5 = KeyboardButton('Топ воркеров')
 menu.row(button1, button2)
 menu.add(button3)
 menu.row(button4, button5)
-
-cancel = InlineKeyboardMarkup()
+spammenu = ReplyKeyboardMarkup(resize_keyboard=True)
 spamworker = KeyboardButton('Воркерам')
 spamuser = KeyboardButton('Юзерам')
 back = KeyboardButton('Назад')
 spammenu.row(spamworker, spamuser).add(back)
-cancel = types.InlineKeyboardMarkup()
+
 cancel.add(InlineKeyboardButton(text="Назад", callback_data="cancel"))
 
 panel = ReplyKeyboardMarkup(resize_keyboard=True)
