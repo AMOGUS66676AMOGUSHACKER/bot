@@ -76,8 +76,6 @@ spamuser = KeyboardButton('Юзерам')
 back = KeyboardButton('Назад')
 spammenu.row(spamworker, spamuser).add(back)
 
-cancel.add(InlineKeyboardButton(text="Назад", callback_data="cancel"))
-
 panel = ReplyKeyboardMarkup(resize_keyboard=True)
 button01 = KeyboardButton('Ссылка')
 button02 = KeyboardButton('Статистика')
