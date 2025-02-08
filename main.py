@@ -1,9 +1,8 @@
 import sqlite3
 import logging
 import re
-
+import threading
 from validate_email import validate_email
-
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import Message
 from aiogram.types import ReplyKeyboardRemove, \
