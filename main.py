@@ -24,7 +24,17 @@ ID = 7138183093 ##айди админа, через запятую если их
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
+def keep_alive():
+    while True:
+        try:
+            response = requests.get(URL)
+            print(f"Keep Alive: {response.status_code}")  # Логируем статус ответа
+        except Exception as e:
+            print(f"Ошибка Keep Alive: {e}")
+        time.sleep(300)  # Запрос каждые 5 минут
 
+thread = threading.Thread(target=keep_alive, daemon=True)
+thread.start()
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
 
