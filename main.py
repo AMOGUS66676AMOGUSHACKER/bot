@@ -80,16 +80,19 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# Создаём inline-клавиатуру для рассылки
-spammenu = InlineKeyboardMarkup(row_width=2)  # ✅ Создаём объект клавиатуры
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# Кнопки
+# Создаём inline-клавиатуру для рассылки
+spammenu = InlineKeyboardMarkup(row_width=2)  # ✅ Сначала создаём объект клавиатуры
+
+# Создаём кнопки
 spamworker = InlineKeyboardButton("📩 Рабочая рассылка", callback_data="spamworker")
 spamuser = InlineKeyboardButton("👥 Рассылка пользователям", callback_data="spamuser")
 back = InlineKeyboardButton("🔙 Назад", callback_data="back")
 
-# Добавляем кнопки в меню
-spammenu.row(spamworker, spamuser).add(back)
+# Добавляем кнопки в клавиатуру
+spammenu.row(spamworker, spamuser).add(back)  # ✅ Теперь ошибки не будет
+
 
 panel = ReplyKeyboardMarkup(resize_keyboard=True)
 button01 = KeyboardButton('Ссылка')
