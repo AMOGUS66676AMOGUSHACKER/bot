@@ -38,7 +38,6 @@ dp.middleware.setup(LoggingMiddleware())
 
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
-spammenu.row(spamworker, spamuser).add(back)
 class dialog(StatesGroup):
     spamworker = State()
     spamuser = State()
