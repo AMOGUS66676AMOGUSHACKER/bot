@@ -76,10 +76,13 @@ menu.row(button4, button5)
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-spammenu = InlineKeyboardMarkup(row_width=2)  # ✅ Создаём клавиатуру
-spamworker = InlineKeyboardButton("📩 Рабочая рассылка", callback_data="spamworker")
-spamuser = InlineKeyboardButton("👥 Рассылка пользователям", callback_data="spamuser")
-back = InlineKeyboardButton("🔙 Назад", callback_data="back")
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+# Клавиатура для рассылки
+spam_keyboard = InlineKeyboardMarkup()
+spam_keyboard.add(InlineKeyboardButton("📩 Рабочая рассылка", callback_data="spamworker"))
+spam_keyboard.add(InlineKeyboardButton("👥 Рассылка пользователям", callback_data="spamuser"))
+spam_keyboard.add(InlineKeyboardButton("❌ Отмена", callback_data="cancel"))
 
 spammenu.row(spamworker, spamuser).add(back)  # ✅ Теперь ошибки не будет
 
