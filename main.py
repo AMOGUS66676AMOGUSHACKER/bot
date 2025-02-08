@@ -39,7 +39,6 @@ dp.middleware.setup(LoggingMiddleware())
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
 spammenu.row(spamworker, spamuser).add(back)
-
 class dialog(StatesGroup):
     spamworker = State()
     spamuser = State()
@@ -79,14 +78,18 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# Клавиатура для рассылки
-spam_keyboard = InlineKeyboardMarkup()
-spam_keyboard.add(InlineKeyboardButton("📩 Рабочая рассылка", callback_data="spamworker"))
-spam_keyboard.add(InlineKeyboardButton("👥 Рассылка пользователям", callback_data="spamuser"))
-spam_keyboard.add(InlineKeyboardButton("❌ Отмена", callback_data="cancel"))
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-spammenu.row(spamworker, spamuser).add(back)  # ✅ Теперь ошибки не будет
+# Создаём inline-клавиатуру для рассылки
+spammenu = InlineKeyboardMarkup(row_width=2)  # ✅ Создаём объект клавиатуры
 
+# Кнопки
+spamworker = InlineKeyboardButton("📩 Рабочая рассылка", callback_data="spamworker")
+spamuser = InlineKeyboardButton("👥 Рассылка пользователям", callback_data="spamuser")
+back = InlineKeyboardButton("🔙 Назад", callback_data="back")
+
+# Добавляем кнопки в меню
+spammenu.row(spamworker, spamuser).add(back)
 
 panel = ReplyKeyboardMarkup(resize_keyboard=True)
 button01 = KeyboardButton('Ссылка')
