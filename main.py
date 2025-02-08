@@ -1,10 +1,9 @@
 import sqlite3
 import logging
 import re
-from flask import Flask
-from validate_email_address import validate_email as ve
+
 from validate_email import validate_email
-from validate_email_address import validate_email
+
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import Message
 from aiogram.types import ReplyKeyboardRemove, \
@@ -14,19 +13,9 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
-app = Flask(__name__)
+
 logging.basicConfig(level=logging.INFO)
-@app.route('/')
-def home():
-    return "Бот работает!"
 
-def run_flask():
-    app.run(host="0.0.0.0", port=10000)
-
-async def main():
-    threading.Thread(target=run_flask, daemon=True).start()  # Запускаем фейковый сервер
-    print("Бот запущен...")
-    await dp.start_polling(bot, skip_updates=True, drop_pending_updates=True)
 storage = MemoryStorage()
 
 TOKEN = '7504404671:AAHblv3vK8wUz3Pb5EY_sDXnKKY1ennrCqU' #токен бота
@@ -69,12 +58,15 @@ button5 = KeyboardButton('Топ воркеров')
 menu.row(button1, button2)
 menu.add(button3)
 menu.row(button4, button5)
-cancel = InlineKeyboardMarkup()
+
 spammenu = ReplyKeyboardMarkup(resize_keyboard=True)
 spamworker = KeyboardButton('Воркерам')
 spamuser = KeyboardButton('Юзерам')
 back = KeyboardButton('Назад')
 spammenu.row(spamworker, spamuser).add(back)
+
+cancel = types.ReplyKeyboardMarkup(resize_keyboard=True)
+cancel.add(types.InlineKeyboardButton(text='Назад'))
 
 panel = ReplyKeyboardMarkup(resize_keyboard=True)
 button01 = KeyboardButton('Ссылка')
