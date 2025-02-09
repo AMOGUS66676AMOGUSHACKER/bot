@@ -27,7 +27,6 @@ dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
-thread.start()
 async def main():
     while True:
         try:
@@ -50,8 +49,14 @@ def run():
     app.run(host="0.0.0.0", port=8080)
 
 def keep_alive():
-    server = Thread(target=run)
-    server.start()
+    thread = Thread(target=run)
+    thread.start()
+
+# Вызов функции keep_alive()
+keep_alive()
+
+# Здесь ваш основной код бота...
+print("Бот запущен!")
 
 class dialog(StatesGroup):
     spamworker = State()
