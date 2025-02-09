@@ -38,15 +38,12 @@ async def main():
             await asyncio.sleep(5)  # Затримка перед новим запуском
 
 def keep_alive():
-    """Фоновий процес для підтримки активності Render"""
     while True:
-        try:
-            url = "https://bot-gvwh.onrender.com"
-            requests.get(url)
-            logging.info(f"Keep-alive запит відправлено на {url}")
-        except Exception as e:
-            logging.warning(f"Keep-alive помилка: {e}")
-        time.sleep(600)  # Запит раз на 10 хвилин
+        print("Бот активний...")  # Це повідомлення буде з'являтися в логах
+        time.sleep(300)  # Запускати кожні 5 хвилин (300 секунд)
+
+thread = threading.Thread(target=keep_alive, daemon=True)
+thread.start()
 
 if __name__ == "__main__":
     # Запуск keep-alive у фоні
