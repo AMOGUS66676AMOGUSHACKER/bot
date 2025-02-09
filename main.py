@@ -24,18 +24,35 @@ ID = 7138183093 ##айди админа, через запятую если их
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
-def keep_alive():
-    while True:
-        try:
-            requests.get("https://dashboard.render.com/web/srv-cuj63c5umphs73940b5g")  # Замените на ваш URL
-            print("Keep-alive ping sent")
-        except Exception as e:
-            print(f"Keep-alive error: {e}")
-        time.sleep(300)  # Раз в 5 минут
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
 thread = threading.Thread(target=keep_alive, daemon=True)
 thread.start()
+async def main():
+    while True:
+        try:
+            await dp.start_polling()
+        except NetworkError as e:
+            logging.warning(f"Помилка мережі: {e}")
+            await asyncio.sleep(5)  # Затримка перед новим запуском
+
+def keep_alive():
+    """Фоновий процес для підтримки активності Render"""
+    while True:
+        try:
+            requests.get("https://ВАШ_УРЛ_РЕНДЕР.onrender.com")
+            logging.info("Keep-alive запит відправлено")
+        except Exception as e:
+            logging.warning(f"Keep-alive помилка: {e}")
+        time.sleep(600)  # Запит раз на 10 хвилин
+
+if __name__ == "__main__":
+    # Запуск keep-alive у фоні
+    thread = threading.Thread(target=keep_alive, daemon=True)
+    thread.start()
+
+    # Запуск бота
+    asyncio.run(main())
 
 class dialog(StatesGroup):
     spamworker = State()
