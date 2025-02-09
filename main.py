@@ -3,6 +3,7 @@ import logging
 import re
 import threading
 import time
+import requests
 from validate_email import validate_email
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import Message
@@ -40,20 +41,23 @@ def keep_alive():
     """Фоновий процес для підтримки активності Render"""
     while True:
         try:
-            requests.get("https://ВАШ_УРЛ_РЕНДЕР.onrender.com")
-            logging.info("Keep-alive запит відправлено")
+            url = "https://ВАШ_УРЛ_РЕНДЕР.onrender.com"
+            requests.get(url)
+            logging.info(f"Keep-alive запит відправлено на {url}")
         except Exception as e:
             logging.warning(f"Keep-alive помилка: {e}")
         time.sleep(600)  # Запит раз на 10 хвилин
 
 if __name__ == "__main__":
     # Запуск keep-alive у фоні
-    thread = threading.Thread(target=keep_alive, daemon=True)
-    thread.start()
+    def start_keep_alive():
+        thread = threading.Thread(target=keep_alive, daemon=True)
+        thread.start()
+
+    start_keep_alive()
 
     # Запуск бота
     asyncio.run(main())
-
 class dialog(StatesGroup):
     spamworker = State()
     spamuser = State()
