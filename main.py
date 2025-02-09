@@ -27,6 +27,9 @@ dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
+const express = require('express')
+const app = express()
+const port = process.env.PORT || 4000;
 thread = threading.Thread(target=keep_alive, daemon=True)
 thread.start()
 async def main():
@@ -41,7 +44,7 @@ def keep_alive():
     """Фоновий процес для підтримки активності Render"""
     while True:
         try:
-            url = "https://ВАШ_УРЛ_РЕНДЕР.onrender.com"
+            url = "https://bot-gvwh.onrender.com"
             requests.get(url)
             logging.info(f"Keep-alive запит відправлено на {url}")
         except Exception as e:
