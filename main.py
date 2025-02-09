@@ -27,16 +27,15 @@ dp.middleware.setup(LoggingMiddleware())
 def keep_alive():
     while True:
         try:
-            response = requests.get(URL)
-            print(f"Keep Alive: {response.status_code}")  # Логируем статус ответа
+            requests.get("https://dashboard.render.com/web/srv-cuj63c5umphs73940b5g")  # Замените на ваш URL
+            print("Keep-alive ping sent")
         except Exception as e:
-            print(f"Ошибка Keep Alive: {e}")
-        time.sleep(300)  # Запрос каждые 5 минут
-
-thread = threading.Thread(target=keep_alive, daemon=True)
-thread.start()
+            print(f"Keep-alive error: {e}")
+        time.sleep(300)  # Раз в 5 минут
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
+thread = threading.Thread(target=keep_alive, daemon=True)
+thread.start()
 
 class dialog(StatesGroup):
     spamworker = State()
