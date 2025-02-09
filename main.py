@@ -37,20 +37,23 @@ async def main():
             logging.warning(f"Помилка мережі: {e}")
             await asyncio.sleep(5)  # Затримка перед новим запуском
 
-# Функція для підтримки активності
-# Функция для поддержки активности
-def keep_alive():
-    while True:
-        try:
-            requests.get("https://bot-gvwh.onrender.com")  # Замени на свой URL Render
-            print("Бот gay...")
-        except requests.exceptions.RequestException:
-            print("Помилка при зверненні до сервера")
-        time.sleep(300)  # Повторювати кожні 5 хвилин
-
 # Запускаємо keep_alive у окремому потоці
-thread = threading.Thread(target=keep_alive, daemon=True)
-thread.start()
+from flask import Flask
+from threading import Thread
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Бот работает!"
+
+def run():
+    app.run(host="0.0.0.0", port=8080)
+
+def keep_alive():
+    server = Thread(target=run)
+    server.start()
+
 class dialog(StatesGroup):
     spamworker = State()
     spamuser = State()
