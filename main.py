@@ -27,7 +27,6 @@ dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
-thread = threading.Thread(target=keep_alive, daemon=True)
 thread.start()
 async def main():
     while True:
