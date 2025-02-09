@@ -27,7 +27,6 @@ dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
-const express = require('express')
 const app = express()
 const port = process.env.PORT || 4000;
 thread = threading.Thread(target=keep_alive, daemon=True)
