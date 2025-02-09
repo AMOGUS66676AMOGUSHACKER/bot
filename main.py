@@ -37,21 +37,19 @@ async def main():
             logging.warning(f"Помилка мережі: {e}")
             await asyncio.sleep(5)  # Затримка перед новим запуском
 
+# Функція для підтримки активності
 def keep_alive():
     while True:
         try:
-            requests.get("https://ТВОЙ-URL.onrender.com")  # Замени на свой URL
-            print("Бот активний...")
+            requests.get("https://bot-gvwh.onrender.com")  # Замініть на свій URL
+            print("Бот не гей...")
         except requests.exceptions.RequestException:
             print("Помилка при зверненні до сервера")
-        time.sleep(300)  # Запуск кожні 5 хвилин
+        time.sleep(300)  # Повторювати кожні 5 хвилин
 
-# Запускаємо keep_alive в окремому потоці
+# Запускаємо keep_alive у окремому потоці
 thread = threading.Thread(target=keep_alive, daemon=True)
 thread.start()
-if __name__ == "__main__":
-    # Запуск бота
-    asyncio.run(main())
 class dialog(StatesGroup):
     spamworker = State()
     spamuser = State()
