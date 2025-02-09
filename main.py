@@ -43,10 +43,11 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Бот работает!"
-
+    return "Бот гей!"
+import os
 def run():
-    app.run(host="0.0.0.0", port=8080)
+
+app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
 
 def keep_alive():
     thread = Thread(target=run)
@@ -56,7 +57,7 @@ def keep_alive():
 keep_alive()
 
 # Здесь ваш основной код бота...
-print("Бот запущен!")
+print("Бот гей!")
 
 class dialog(StatesGroup):
     spamworker = State()
