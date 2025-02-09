@@ -41,8 +41,8 @@ async def main():
 def keep_alive():
     while True:
         try:
-            requests.get("https://bot-gvwh.onrender.com")  # Замініть на свій URL
-            print("Бот не гей...")
+            requests.get("https://ТВОЙ-URL.onrender.com")  # Замініть на свій URL Render
+            print("Бот активний...")
         except requests.exceptions.RequestException:
             print("Помилка при зверненні до сервера")
         time.sleep(300)  # Повторювати кожні 5 хвилин
