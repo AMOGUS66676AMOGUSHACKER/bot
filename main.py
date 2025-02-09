@@ -38,11 +38,12 @@ async def main():
             await asyncio.sleep(5)  # Затримка перед новим запуском
 
 # Функція для підтримки активності
+# Функция для поддержки активности
 def keep_alive():
     while True:
         try:
-            requests.get("https://ТВОЙ-URL.onrender.com")  # Замініть на свій URL Render
-            print("Бот активний...")
+            requests.get("https://bot-gvwh.onrender.com")  # Замени на свой URL Render
+            print("Бот gay...")
         except requests.exceptions.RequestException:
             print("Помилка при зверненні до сервера")
         time.sleep(300)  # Повторювати кожні 5 хвилин
