@@ -39,20 +39,17 @@ async def main():
 
 def keep_alive():
     while True:
-        print("Бот активний...")  # Це повідомлення буде з'являтися в логах
-        time.sleep(300)  # Запускати кожні 5 хвилин (300 секунд)
+        try:
+            requests.get("https://ТВОЙ-URL.onrender.com")  # Замени на свой URL
+            print("Бот активний...")
+        except requests.exceptions.RequestException:
+            print("Помилка при зверненні до сервера")
+        time.sleep(300)  # Запуск кожні 5 хвилин
 
+# Запускаємо keep_alive в окремому потоці
 thread = threading.Thread(target=keep_alive, daemon=True)
 thread.start()
-
 if __name__ == "__main__":
-    # Запуск keep-alive у фоні
-    def start_keep_alive():
-        thread = threading.Thread(target=keep_alive, daemon=True)
-        thread.start()
-
-    start_keep_alive()
-
     # Запуск бота
     asyncio.run(main())
 class dialog(StatesGroup):
