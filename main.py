@@ -49,7 +49,18 @@ def run():
 
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
 
+import asyncio
+
+async def keep_alive():
+    while True:
+        try:
+            await bot.send_message(YOUR_ADMIN_ID, "Бот працює 🔄")
+        except Exception as e:
+            print(f"Помилка пінгу: {e}")
+        await asyncio.sleep(300)  # Кожні 5 хвилин
+
 def keep_alive():
+    
     pass  # Щось має бути всередині функції
     thread = Thread(target=run)
     thread.start()
