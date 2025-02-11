@@ -4,6 +4,7 @@ import re
 import threading
 import time
 import requests
+import os
 from validate_email import validate_email
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import Message
