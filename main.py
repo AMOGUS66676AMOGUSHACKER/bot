@@ -43,34 +43,28 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Бот гей!"
-import os
-def run():
+    return "https://bot-gvwh.onrender.com"
 
+def run_flask():
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
 
-import asyncio
-
-async def keep_alive():
+def ping_self():
+    """Функция будет пинговать бота каждые 5 минут"""
     while True:
         try:
-            await bot.send_message(YOUR_ADMIN_ID, "Бот працює 🔄")
+            url = "https://your-bot-service.onrender.com/"  # Укажите свой URL
+            requests.get(url)
+            print("Пинг успешен")
         except Exception as e:
-            print(f"Помилка пінгу: {e}")
-        await asyncio.sleep(300)  # Кожні 5 хвилин
+            print(f"Ошибка пинга: {e}")
+        time.sleep(300)  # 5 минут
 
-def keep_alive():
-    
-    pass  # Щось має бути всередині функції
-    thread = Thread(target=run)
-    thread.start()
+# Запускаем Flask и пингование в отдельных потоках
+flask_thread = threading.Thread(target=run_flask, daemon=True)
+ping_thread = threading.Thread(target=ping_self, daemon=True)
 
-# Вызов функции keep_alive()
-keep_alive()
-
-# Здесь ваш основной код бота...
-print("Бот гей!")
-
+flask_thread.start()
+ping_thread.start()
 class dialog(StatesGroup):
     spamworker = State()
     spamuser = State()
