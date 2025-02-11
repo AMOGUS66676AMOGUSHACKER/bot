@@ -117,8 +117,12 @@ panel.add(button04)
 menu.add(KeyboardButton('✉ Написать админу бота'))
 class ContactAdmin(StatesGroup):
     waiting_for_message = State()
-
-@dp.message_handler(content_types=['text'], text='✉ Написати адміну')
+def get_user_menu(user_id):
+    user_menu = menu.copy()  # Копируем стандартное меню
+    if user_id != ID:
+        user_menu.add(KeyboardButton('✉ Написать админу'))
+    return user_menu
+@dp.message_handler(content_types=['text'], text='✉ Написать админу')
 async def contact_admin(message: types.Message):
     await message.answer("✏ Напишите ваше уведомление для администратора:")
     await ContactAdmin.waiting_for_message.set()
@@ -139,7 +143,7 @@ async def send_to_admin(message: types.Message, state: FSMContext):
     text = f"📩 *Нове повідомлення від користувача:*\n\n👤 Ім'я: {user.full_name}\n🆔 ID: `{user.id}`\n\n💬 Повідомлення:\n{message.text}"
 
     await bot.send_message(admin_id, text, parse_mode="Markdown")
-    await message.answer("✅ Ваше повідомлення відправлено адміністратору!")
+    await message.answer("✅ Ваше сообщение отправлено администратору!")
     await state.finish()
 
 @dp.message_handler(commands = 'start')
@@ -148,6 +152,7 @@ async def start(message: types.Message):
     result = cursor.fetchall()
     if message.from_user.id == ID:
                 user_menu = menu.add(KeyboardButton('✉ Написать админу'))
+            user_menu = get_user_menu(message.from_user.id)
         await message.answer('👋 Добро пожаловать!', reply_markup=user_menu)
 
         await message.answer('Добро пожаловать!', reply_markup=menu)
