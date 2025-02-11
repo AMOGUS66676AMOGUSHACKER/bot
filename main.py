@@ -127,8 +127,6 @@ async def contact_admin(message: types.Message):
     if message.from_user.id != ID:  # Проверяем, не является ли пользователь админом
         await message.answer("✏ Напишите ваше уведомление для администратора:")
         await ContactAdmin.waiting_for_message.set()
-
-    if message.from_user.id != ID:
 kb_info = InlineKeyboardMarkup()
 btn_channel = InlineKeyboardButton('Канал', url='https://t.me/')
 btn_chat = InlineKeyboardButton('Чат', url='https://t.me/')
