@@ -122,6 +122,8 @@ class ContactAdmin(StatesGroup):
 async def contact_admin(message: types.Message):
     await message.answer("✏ Напишите ваше уведомление для администратора:")
     await ContactAdmin.waiting_for_message.set()
+    if message.from_user.id != ID:
+    menu.add(KeyboardButton('✉ Написать админу'))
 kb_info = InlineKeyboardMarkup()
 btn_channel = InlineKeyboardButton('Канал', url='https://t.me/')
 btn_chat = InlineKeyboardButton('Чат', url='https://t.me/')
@@ -145,6 +147,9 @@ async def start(message: types.Message):
     cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
     result = cursor.fetchall()
     if message.from_user.id == ID:
+                user_menu = menu.add(KeyboardButton('✉ Написать админу'))
+        await message.answer('👋 Добро пожаловать!', reply_markup=user_menu)
+
         await message.answer('Добро пожаловать!', reply_markup=menu)
     else:
         if not result:
