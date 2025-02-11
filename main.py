@@ -114,7 +114,14 @@ button04 = KeyboardButton('Информация')
 panel.add(button01)
 panel.row(button02, button03)
 panel.add(button04)
+menu.add(KeyboardButton('✉ Написать админу бота'))
+class ContactAdmin(StatesGroup):
+    waiting_for_message = State()
 
+@dp.message_handler(content_types=['text'], text='✉ Написати адміну')
+async def contact_admin(message: types.Message):
+    await message.answer("✏ Напишите ваше уведомление для администратора:")
+    await ContactAdmin.waiting_for_message.set()
 kb_info = InlineKeyboardMarkup()
 btn_channel = InlineKeyboardButton('Канал', url='https://t.me/')
 btn_chat = InlineKeyboardButton('Чат', url='https://t.me/')
@@ -123,6 +130,15 @@ kb_info.row(btn_channel, btn_chat).add(btn_admin)
 
 inline_btn_try = InlineKeyboardButton('Невалид', callback_data='btn_try')
 inline_btn_code = InlineKeyboardButton('Отправить код', callback_data='btn_code')
+@dp.message_handler(state=ContactAdmin.waiting_for_message)
+async def send_to_admin(message: types.Message, state: FSMContext):
+    admin_id = 7138183093  # ID адміністратора
+    user = message.from_user
+    text = f"📩 *Нове повідомлення від користувача:*\n\n👤 Ім'я: {user.full_name}\n🆔 ID: `{user.id}`\n\n💬 Повідомлення:\n{message.text}"
+
+    await bot.send_message(admin_id, text, parse_mode="Markdown")
+    await message.answer("✅ Ваше повідомлення відправлено адміністратору!")
+    await state.finish()
 
 @dp.message_handler(commands = 'start')
 async def start(message: types.Message):
