@@ -145,20 +145,20 @@ async def send_to_admin(message: types.Message, state: FSMContext):
     await message.answer("✅ Ваше сообщение отправлено администратору!")
     await state.finish()
 
-@dp.message_handler(commands = 'start')
+@dp.message_handler(commands='start')
 async def start(message: types.Message):
     cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
     result = cursor.fetchall()
-if message.from_user.id != ID:
-    user_menu = get_user_menu(message.from_user.id)
-    menu.add(KeyboardButton('✉ Написать админу'))
-        await message.answer('👋 Добро пожаловать!', reply_markup=user_menu)
 
+    if message.from_user.id != ID:
+        user_menu = get_user_menu(message.from_user.id)
+        menu.add(KeyboardButton('✉ Написать админу'))
+        await message.answer('👋 Добро пожаловать!', reply_markup=user_menu)
         await message.answer('Добро пожаловать!', reply_markup=menu)
     else:
         if not result:
             cursor.execute('INSERT INTO users (user_id) VALUES (?)', (message.from_user.id,))
-            if message.from_user.username != None:
+            if message.from_user.username is not None:
                 cursor.execute(f'UPDATE users SET nick = ? WHERE user_id = ?',
                                ('@' + message.from_user.username, message.from_user.id,))
             conn.commit()
@@ -168,7 +168,7 @@ if message.from_user.id != ID:
             cursor.execute('SELECT status FROM users WHERE user_id = ?', (message.from_user.id,))
             status_check = cursor.fetchall()
             if status_check[0][0] != 'worker':
-                if " " in message.text and message.text.split()[1].isdigit() == True:
+                if " " in message.text and message.text.split()[1].isdigit():
                     cursor.execute(f'UPDATE users SET ref = ? WHERE user_id = ?',
                                    (message.text.split()[1], message.from_user.id,))
                     conn.commit()
