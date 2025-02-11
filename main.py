@@ -152,7 +152,7 @@ async def start(message: types.Message):
 
 if message.from_user.id != ID:
     user_menu = get_user_menu(message.from_user.id)
-        menu.add(KeyboardButton('✉ Написать админу'))
+    menu.add(KeyboardButton('✉ Написать админу'))
         await message.answer('👋 Добро пожаловать!', reply_markup=user_menu)
         await message.answer('Добро пожаловать!', reply_markup=menu)
     else:
