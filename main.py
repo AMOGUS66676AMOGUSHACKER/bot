@@ -150,8 +150,8 @@ async def start(message: types.Message):
     cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
     result = cursor.fetchall()
 
-ID = 7138183093  # айди админа
-        user_menu = get_user_menu(message.from_user.id)
+if message.from_user.id != ID:
+    user_menu = get_user_menu(message.from_user.id)
         menu.add(KeyboardButton('✉ Написать админу'))
         await message.answer('👋 Добро пожаловать!', reply_markup=user_menu)
         await message.answer('Добро пожаловать!', reply_markup=menu)
