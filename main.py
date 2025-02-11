@@ -293,6 +293,21 @@ async def entrpassword(message: types.Message, state: FSMContext):
         await state.finish()
     else:
         await message.answer('Вы ввели некорректный пароль\n  Попробуйте снова!')
+@dp.message_handler(commands=['відповісти'])
+async def reply_to_user(message: types.Message):
+    args = message.text.split(maxsplit=2)
+    if len(args) < 3 or not args[1].isdigit():
+        await message.answer("❌ Формат: `/відповісти ID текст`")
+        return
+
+    user_id = int(args[1])
+    response_text = args[2]
+
+    try:
+        await bot.send_message(user_id, f"📩 Ответ від администратора:\n\n{response_text}")
+        await message.answer("✅ Відповідь відправлена!")
+    except:
+        await message.answer("❌ Неможливо відправити відповідь цьому користувачу.")
 
 @dp.callback_query_handler(lambda c: c.data == 'btn_try')
 async def process_callback_button1(callback_query: types.CallbackQuery):
