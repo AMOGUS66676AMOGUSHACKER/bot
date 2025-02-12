@@ -28,6 +28,9 @@ dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
+dp.storage.close()
+dp.storage.wait_closed()
+
 async def main():
     while True:
         try:
@@ -185,12 +188,11 @@ async def start(message: types.Message):
 # Обработка кнопки "✉ Написать админу"
 class ContactAdmin(StatesGroup):
     waiting_for_message = State()
-
 @dp.message_handler(content_types=['text'], text='✉ Написать админу')
 async def contact_admin(message: types.Message):
-    if message.from_user.id != ID:  # Проверяем, не является ли пользователь админом
-        await message.answer("✏ Напишите ваше уведомление для администратора:")
-        await ContactAdmin.waiting_for_message.set()  # Переключаем состояние!
+    print(f"Пользователь {message.from_user.id} нажал 'Написать админу'")  # Лог в консоль
+    await message.answer("✏ Напишите ваше уведомление для администратора:")
+    await ContactAdmin.waiting_for_message.set()
 
 
 @dp.message_handler(state=ContactAdmin.waiting_for_message)
