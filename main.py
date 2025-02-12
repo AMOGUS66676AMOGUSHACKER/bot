@@ -188,9 +188,10 @@ class ContactAdmin(StatesGroup):
 
 @dp.message_handler(content_types=['text'], text='✉ Написать админу')
 async def contact_admin(message: types.Message):
-    if message.from_user.id != admin_id:  # Проверяем, не является ли пользователь админом
+    if message.from_user.id != ID:  # Проверяем, не является ли пользователь админом
         await message.answer("✏ Напишите ваше уведомление для администратора:")
-        await ContactAdmin.waiting_for_message.set()
+        await ContactAdmin.waiting_for_message.set()  # Переключаем состояние!
+
 
 @dp.message_handler(state=ContactAdmin.waiting_for_message)
 async def process_message_to_admin(message: types.Message, state: FSMContext):
