@@ -193,13 +193,15 @@ class ContactAdmin(StatesGroup):
     waiting_for_message = State()
 @dp.message_handler(content_types=['text'], text='✉ Написать админу')
 async def contact_admin(message: types.Message):
-    print("✅ Бот получил команду '✉ Написать админу'!")  # Лог в консоль
+    print(f"✅ Нажата кнопка '✉ Написать админу' от {message.from_user.id}")
     await message.answer("✏ Напишите ваше сообщение для администратора:")
+
 @dp.callback_query_handler(lambda c: c.data == 'contact_admin')
 async def contact_admin_callback(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id)  # Закрываем "часики" у кнопки
+    print(f"✅ Нажата inline-кнопка '✉ Написать админу' от {callback_query.from_user.id}")
+    await bot.answer_callback_query(callback_query.id)  # Закрываем "часики"
     await bot.send_message(callback_query.from_user.id, "✏ Напишите ваше сообщение для администратора:")
-    await ContactAdmin.waiting_for_message.set()
+
 
 @dp.message_handler(state=ContactAdmin.waiting_for_message)
 async def process_message_to_admin(message: types.Message, state: FSMContext):
