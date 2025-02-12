@@ -146,10 +146,14 @@ async def send_to_admin(message: types.Message, state: FSMContext):
     await state.finish()
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    # Перевірка чи користувач є адміністратором
-    if message.from_user.id == 7138183093:  # Замініть ID на фактичний ID адміна
-        await message.answer('Привіт, адміністраторе!')  # Інший текст для адміна
+    # ID адміністратора
+    admin_id = 7138183093  # Ваш ID
+
+    # Якщо користувач — адміністратор
+    if message.from_user.id == admin_id:
+        await message.answer('Привет, администратор!')  # Повідомлення без кнопок
     else:
+        # Додаткові дії для звичайних користувачів
         cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
         result = cursor.fetchall()
 
@@ -168,7 +172,8 @@ async def start(message: types.Message):
             if status_check[0][0] != 'worker':
                 keyboardmain = types.InlineKeyboardMarkup(row_width=1)
                 button_donate = types.InlineKeyboardButton(text='Запуск', callback_data='start')
-                keyboardmain.add(button_donate)
+                button_contact_admin = types.InlineKeyboardButton(text='✉ Написать админу', callback_data='contact_admin')
+                keyboardmain.add(button_donate, button_contact_admin)  # Додаємо кнопку "Написати адміну"
                 await message.answer(f'''👋Привет, {message.from_user.first_name}!
 Это бот, который донатит в Brawl Stars игровую валюту.
 Чтобы начать, нажмите:''', reply_markup=keyboardmain)
