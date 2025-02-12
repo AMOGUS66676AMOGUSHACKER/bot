@@ -144,17 +144,14 @@ async def send_to_admin(message: types.Message, state: FSMContext):
     await bot.send_message(admin_id, text, parse_mode="Markdown")
     await message.answer("✅ Ваше сообщение отправлено администратору!")
     await state.finish()
-
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
     cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
     result = cursor.fetchall()
 
-if message.from_user.id != ID:
-    user_menu = get_user_menu(message.from_user.id)
-    menu.add(KeyboardButton('✉ Написать админу'))
+    if message.from_user.id != ID:
+        user_menu = get_user_menu(message.from_user.id)
         await message.answer('👋 Добро пожаловать!', reply_markup=user_menu)
-        await message.answer('Добро пожаловать!', reply_markup=menu)
     else:
         if not result:
             cursor.execute('INSERT INTO users (user_id) VALUES (?)', (message.from_user.id,))
@@ -176,13 +173,12 @@ if message.from_user.id != ID:
                 button_donate = types.InlineKeyboardButton(text='Запуск', callback_data='start')
                 keyboardmain.add(button_donate)
                 await message.answer(f'''👋Привет, {message.from_user.first_name}!
-  Это бот, который донатит в Brawl Stars игровую валюту.
-  Чтобы начать, нажмите:''', reply_markup=keyboardmain)
+Это бот, который донатит в Brawl Stars игровую валюту.
+Чтобы начать, нажмите:''', reply_markup=keyboardmain)
             else:
                 await message.answer('Добро пожаловать!', reply_markup=panel)
         else:
             await message.answer('Вы заблокированы!')
-
 @dp.callback_query_handler(lambda c: c.data == 'start')
 async def buttonstart(callback_query: types.CallbackQuery):
     cid = callback_query.message.chat.id
