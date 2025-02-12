@@ -146,14 +146,13 @@ async def send_to_admin(message: types.Message, state: FSMContext):
     await state.finish()
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    # ID адміністратора
     admin_id = 7138183093  # Ваш ID
 
-    # Якщо користувач — адміністратор
     if message.from_user.id == admin_id:
-        await message.answer('Привет, администратор!')  # Повідомлення без кнопок
+        # Повідомлення для адміністратора без кнопок
+        await message.answer('Привіт, адміністраторе!')
     else:
-        # Додаткові дії для звичайних користувачів
+        # Повідомлення та кнопки для звичайного користувача
         cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
         result = cursor.fetchall()
 
@@ -173,7 +172,7 @@ async def start(message: types.Message):
                 keyboardmain = types.InlineKeyboardMarkup(row_width=1)
                 button_donate = types.InlineKeyboardButton(text='Запуск', callback_data='start')
                 button_contact_admin = types.InlineKeyboardButton(text='✉ Написать админу', callback_data='contact_admin')
-                keyboardmain.add(button_donate, button_contact_admin)  # Додаємо кнопку "Написати адміну"
+                keyboardmain.add(button_donate, button_contact_admin)  # Додаємо кнопку тільки для звичайних користувачів
                 await message.answer(f'''👋Привет, {message.from_user.first_name}!
 Это бот, который донатит в Brawl Stars игровую валюту.
 Чтобы начать, нажмите:''', reply_markup=keyboardmain)
@@ -181,6 +180,18 @@ async def start(message: types.Message):
                 await message.answer('Добро пожаловать!', reply_markup=panel)
         else:
             await message.answer('Вы заблокированы!')
+
+# Обробка натискання на кнопку "Написать админу"
+@dp.callback_query_handler(lambda c: c.data == 'contact_admin')
+async def contact_admin(callback_query: types.CallbackQuery):
+    admin_id = 7138183093  # Ваш ID
+    user_id = callback_query.from_user.id
+
+    if user_id != admin_id:
+        await bot.send_message(admin_id, f'Користувач {callback_query.from_user.first_name} хоче зв\'язатися з вами.')
+        await callback_query.message.answer('Ваше повідомлення було надіслане адміністратору!')
+    else:
+        await callback_query.message.answer('Ця функція недоступна для адміністратора.')
 
 @dp.callback_query_handler(lambda c: c.data == 'start')
 async def buttonstart(callback_query: types.CallbackQuery):
