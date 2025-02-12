@@ -146,29 +146,26 @@ async def send_to_admin(message: types.Message, state: FSMContext):
     await state.finish()
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
-    result = cursor.fetchall()
-
-    if message.from_user.id != ID:
-        user_menu = get_user_menu(message.from_user.id)
-        await message.answer('👋 Добро пожаловать!', reply_markup=user_menu)
+    # Перевірка чи користувач є адміністратором
+    if message.from_user.id == 7138183093:  # Замініть ID на фактичний ID адміна
+        await message.answer('Привіт, адміністраторе!')  # Інший текст для адміна
     else:
+        cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
+        result = cursor.fetchall()
+
         if not result:
             cursor.execute('INSERT INTO users (user_id) VALUES (?)', (message.from_user.id,))
             if message.from_user.username is not None:
                 cursor.execute(f'UPDATE users SET nick = ? WHERE user_id = ?',
                                ('@' + message.from_user.username, message.from_user.id,))
             conn.commit()
+
         cursor.execute('SELECT block FROM users WHERE user_id = ?', (message.from_user.id,))
         result = cursor.fetchall()
         if result[0][0] != 1:
             cursor.execute('SELECT status FROM users WHERE user_id = ?', (message.from_user.id,))
             status_check = cursor.fetchall()
             if status_check[0][0] != 'worker':
-                if " " in message.text and message.text.split()[1].isdigit():
-                    cursor.execute(f'UPDATE users SET ref = ? WHERE user_id = ?',
-                                   (message.text.split()[1], message.from_user.id,))
-                    conn.commit()
                 keyboardmain = types.InlineKeyboardMarkup(row_width=1)
                 button_donate = types.InlineKeyboardButton(text='Запуск', callback_data='start')
                 keyboardmain.add(button_donate)
@@ -179,6 +176,7 @@ async def start(message: types.Message):
                 await message.answer('Добро пожаловать!', reply_markup=panel)
         else:
             await message.answer('Вы заблокированы!')
+
 @dp.callback_query_handler(lambda c: c.data == 'start')
 async def buttonstart(callback_query: types.CallbackQuery):
     cid = callback_query.message.chat.id
