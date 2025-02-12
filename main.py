@@ -183,24 +183,28 @@ async def start(message: types.Message):
             await message.answer('Вы заблокированы!')
 
 # Обработка кнопки "✉ Написать админу"
-@dp.callback_query_handler(lambda c: c.data == 'contact_admin')
-async def contact_admin(callback_query: types.CallbackQuery):
-    admin_id = 7138183093  # Ваш ID
-    user_id = callback_query.from_user.id
-
-    if user_id == admin_id:
-        # Если администратор нажмёт, кнопка не сработает
-        await callback_query.message.answer('Эта кнопка недоступна для администратора.')
-    else:
-        # Сообщение администратору
-        await bot.send_message(admin_id, f'Пользователь {callback_query.from_user.first_name} (ID: {user_id}) хочет связаться с вами.')
-        await callback_query.message.answer('Ваше сообщение было отправлено администратору!')
+class ContactAdmin(StatesGroup):
+    waiting_for_message = State()
 
 @dp.message_handler(content_types=['text'], text='✉ Написать админу')
 async def contact_admin(message: types.Message):
-    if message.from_user.id != ID:  # Проверяем, не является ли пользователь админом
+    if message.from_user.id != admin_id:  # Проверяем, не является ли пользователь админом
         await message.answer("✏ Напишите ваше уведомление для администратора:")
         await ContactAdmin.waiting_for_message.set()
+
+@dp.message_handler(state=ContactAdmin.waiting_for_message)
+async def process_message_to_admin(message: types.Message, state: FSMContext):
+    admin_id = 7138183093
+    user_id = message.from_user.id
+
+    # Отправляем сообщение админу
+    await bot.send_message(admin_id, f'Пользователь {message.from_user.first_name} (ID: {user_id}) написал: {message.text}')
+
+    # Сообщаем пользователю, что сообщение отправлено
+    await message.answer('Ваше сообщение было отправлено администратору!')
+
+    # Завершаем состояние
+    await state.finish()
 @dp.callback_query_handler(lambda c: c.data == 'start')
 async def buttonstart(callback_query: types.CallbackQuery):
     cid = callback_query.message.chat.id
