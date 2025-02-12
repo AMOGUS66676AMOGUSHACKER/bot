@@ -189,9 +189,10 @@ async def contact_admin(callback_query: types.CallbackQuery):
 
     if user_id != admin_id:
         await bot.send_message(admin_id, f'Користувач {callback_query.from_user.first_name} хоче зв\'язатися з вами.')
-        await callback_query.message.answer('Ваше повідомлення було надіслане адміністратору!')
+        await callback_query.message.answer('Ваше сообщение было отправлено администратору!')
     else:
         await callback_query.message.answer('Ця функція недоступна для адміністратора.')
+
 
 @dp.callback_query_handler(lambda c: c.data == 'start')
 async def buttonstart(callback_query: types.CallbackQuery):
