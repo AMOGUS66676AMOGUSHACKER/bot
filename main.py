@@ -195,6 +195,11 @@ class ContactAdmin(StatesGroup):
 async def contact_admin(message: types.Message):
     print("✅ Бот получил команду '✉ Написать админу'!")  # Лог в консоль
     await message.answer("✏ Напишите ваше сообщение для администратора:")
+@dp.callback_query_handler(lambda c: c.data == 'contact_admin')
+async def contact_admin_callback(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)  # Закрываем "часики" у кнопки
+    await bot.send_message(callback_query.from_user.id, "✏ Напишите ваше сообщение для администратора:")
+    await ContactAdmin.waiting_for_message.set()
 
 @dp.message_handler(state=ContactAdmin.waiting_for_message)
 async def process_message_to_admin(message: types.Message, state: FSMContext):
