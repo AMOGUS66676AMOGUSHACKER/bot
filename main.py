@@ -30,6 +30,9 @@ conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
 dp.storage.close()
 dp.storage.wait_closed()
+@dp.message_handler()
+async def debug_all_messages(message: types.Message):
+    print(f"📩 Получено сообщение: {message.text}")
 
 async def main():
     while True:
@@ -56,7 +59,7 @@ def ping_self():
     """Функция будет пинговать бота каждые 5 минут"""
     while True:
         try:
-            url = "https://your-bot-service.onrender.com/"  # Укажите свой URL
+            url = "https://bot-gvwh.onrender.com"  # Укажите свой URL
             requests.get(url)
             print("Пинг успешен")
         except Exception as e:
@@ -117,7 +120,7 @@ button04 = KeyboardButton('Информация')
 panel.add(button01)
 panel.row(button02, button03)
 panel.add(button04)
-menu.add(KeyboardButton('✉ Написать админу бота'))
+menu.add(KeyboardButton('✉ Написать админу'))
 class ContactAdmin(StatesGroup):
     waiting_for_message = State()
 def get_user_menu(user_id):
@@ -190,10 +193,8 @@ class ContactAdmin(StatesGroup):
     waiting_for_message = State()
 @dp.message_handler(content_types=['text'], text='✉ Написать админу')
 async def contact_admin(message: types.Message):
-    print(f"Пользователь {message.from_user.id} нажал 'Написать админу'")  # Лог в консоль
-    await message.answer("✏ Напишите ваше уведомление для администратора:")
-    await ContactAdmin.waiting_for_message.set()
-
+    print("✅ Бот получил команду '✉ Написать админу'!")  # Лог в консоль
+    await message.answer("✏ Напишите ваше сообщение для администратора:")
 
 @dp.message_handler(state=ContactAdmin.waiting_for_message)
 async def process_message_to_admin(message: types.Message, state: FSMContext):
