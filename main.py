@@ -28,19 +28,16 @@ dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 conn = sqlite3.connect('db.db')
 cursor = conn.cursor()
-dp.storage.close()
-dp.storage.wait_closed()
 @dp.message_handler()
 async def debug_all_messages(message: types.Message):
     print(f"📩 Получено сообщение: {message.text}")
 
-async def main():
-    while True:
-        try:
-            await dp.start_polling()
-        except NetworkError as e:
-            logging.warning(f"Помилка мережі: {e}")
-            await asyncio.sleep(5)  # Затримка перед новим запуском
+async def on_startup(dp):
+    await bot.delete_webhook(drop_pending_updates=True)  # Видаляємо Webhook, щоб не було конфлікту з Polling
+
+if __name__ == '__main__':
+    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+
 
 # Запускаємо keep_alive у окремому потоці
 from flask import Flask
