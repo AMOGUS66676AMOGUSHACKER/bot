@@ -118,6 +118,9 @@ panel.add(button01)
 panel.row(button02, button03)
 panel.add(button04)
 menu.add(KeyboardButton('✉ Написать админу'))
+async def on_startup(dp):
+    await bot.delete_webhook(drop_pending_updates=True)  # Видаляє старі повідомлення
+
 class ContactAdmin(StatesGroup):
     waiting_for_message = State()
 def get_user_menu(user_id):
@@ -581,5 +584,9 @@ async def back(message: Message):
     else:
         await message.answer('Главное меню', reply_markup=panel)
 
+async def on_startup(dp):
+    await bot.delete_webhook(drop_pending_updates=True)  # Видаляємо Webhook
+
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+
