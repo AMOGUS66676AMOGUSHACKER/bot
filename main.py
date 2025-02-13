@@ -166,9 +166,9 @@ async def start(message: types.Message):
 async def contact_admin(message: types.Message):
     await message.answer("✏ Напишите ваше сообщение для администратора:")
     await ContactAdmin.waiting_for_message.set()
-    @dp.message_handler(state=ContactAdmin.waiting_for_message)
+@dp.message_handler(state=ContactAdmin.waiting_for_message)
 async def send_to_admin(message: types.Message, state: FSMContext):
-    admin_id = ID  # ID администратора
+    admin_id = 7138183093  # ID администратора
     user = message.from_user
 
     text = f"📩 *Новое сообщение от пользователя:*\n\n" \
@@ -182,6 +182,7 @@ async def send_to_admin(message: types.Message, state: FSMContext):
     await bot.send_message(admin_id, text, parse_mode="Markdown", reply_markup=reply_markup)
     await message.answer("✅ Ваше сообщение отправлено администратору!")
     await state.finish()
+
 # ⬇ Админ нажимает "Ответить" → бот запрашивает текст ответа
 @dp.callback_query_handler(lambda c: c.data.startswith("reply_"))
 async def ask_admin_reply(callback_query: CallbackQuery, state: FSMContext):
