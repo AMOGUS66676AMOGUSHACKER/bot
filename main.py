@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 
 storage = MemoryStorage()
 
-TOKEN = '7921716526:AAFswxmemPy861e1hLUdnLAdzno-tD1F8Jo' #токен бота
+TOKEN = '7475974343:AAEc1mYi5GWA6QWrNFSqzqWjcYeLG3nFdsA' #токен бота
 ID = 7138183093 ##айди админа, через запятую если их несколько
 
 bot = Bot(token=TOKEN)
