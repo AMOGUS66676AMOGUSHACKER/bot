@@ -137,10 +137,10 @@ inline_btn_code = InlineKeyboardButton('Отправить код', callback_dat
 async def start(message: types.Message):
     cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
     result = cursor.fetchall()
-    if message.from_user.id == ID:
+   if message.from_user.id == ID:
     await message.answer('Добро пожаловать!', reply_markup=menu)  # Адмінське меню
 else:
-    await message.answer('Добро пожаловать!', reply_markup=panel)  # Меню юзерів
+    await message.answer('Добро пожаловать!', reply_markup=panel)  # Меню для юзера
 
         if not result:
             cursor.execute('INSERT INTO users (user_id) VALUES (?)', (message.from_user.id,))
