@@ -177,8 +177,6 @@ if status_check and status_check[0][0] != "worker":
 Чтобы начать, нажмите: """, reply_markup=keyboardmain)
 else:
     await message.answer("Добро пожаловать!", reply_markup=panel)
-    else:
-            await message.answer("Вы заблокированы!")
 @dp.message_handler(content_types=['text'], text='✉ Написать админу')
 async def contact_admin(message: types.Message):
     await message.answer("✏ Напишите ваше сообщение для администратора:")
