@@ -135,11 +135,10 @@ inline_btn_code = InlineKeyboardButton('Отправить код', callback_dat
 
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
-    # Проверка, если пользователя нет в базе, добавляем
     cursor.execute("SELECT id FROM users WHERE user_id = ?", (message.from_user.id,))
     result = cursor.fetchall()
 
-    if not result:  # Если пользователя нет в базе
+    if not result:
         cursor.execute("INSERT INTO users (user_id) VALUES (?)", (message.from_user.id,))
         conn.commit()
 
@@ -151,16 +150,16 @@ async def start(message: types.Message):
         status_check = cursor.fetchall()
 
         if status_check and status_check[0][0] != "worker":
-            # Добавление кнопок
+            # Создаём inline клавиатуру с кнопкой для запуска
             keyboardmain = types.InlineKeyboardMarkup(row_width=1)
             button_donate = types.InlineKeyboardButton(text="Запуск", callback_data="start")
             keyboardmain.add(button_donate)
 
-            # Кнопка для связи с админом
-            button_contact_admin = KeyboardButton('✉ Написать админу')
+            # Кнопка для написания админу через callback
+            button_contact_admin = types.InlineKeyboardButton('✉ Написать админу', callback_data=f"contact_admin_{message.from_user.id}")
             keyboardmain.add(button_contact_admin)
 
-            # Отправка приветственного сообщения
+            # Отправляем сообщение с клавишей
             await message.answer(f"""👋Привет, {message.from_user.first_name}!
 Это бот, который донатит в Brawl Stars игровую валюту.
 Чтобы начать, нажмите: """, reply_markup=keyboardmain)
@@ -169,10 +168,17 @@ async def start(message: types.Message):
     else:
         await message.answer("Вы заблокированы!", reply_markup=ReplyKeyboardRemove())
 
-@dp.message_handler(content_types=['text'], text='✉ Написать админу')
-async def contact_admin(message: types.Message):
-    await message.answer("✏ Напишите ваше сообщение для администратора:")
+# Обработчик для кнопки "Написать админу"
+@dp.callback_query_handler(lambda c: c.data.startswith("contact_admin_"))
+async def contact_admin(callback_query: CallbackQuery):
+    user_id = int(callback_query.data.split("_")[-1])
+    await callback_query.answer()  # Закрыть инлайн кнопку (неважно, но лучше добавить)
+
+    # Запрашиваем у пользователя сообщение для администратора
+    await bot.send_message(user_id, "✏ Напишите ваше сообщение для администратора:")
     await ContactAdmin.waiting_for_message.set()
+
+# Обработчик для получения сообщения от пользователя и отправки админу
 @dp.message_handler(state=ContactAdmin.waiting_for_message)
 async def send_to_admin(message: types.Message, state: FSMContext):
     admin_id = 7138183093  # ID администратора
@@ -186,11 +192,12 @@ async def send_to_admin(message: types.Message, state: FSMContext):
     # Добавляем кнопку "Ответить"
     reply_markup = InlineKeyboardMarkup().add(InlineKeyboardButton("📝 Ответить", callback_data=f"reply_{user.id}"))
 
+    # Отправляем сообщение админу
     await bot.send_message(admin_id, text, parse_mode="Markdown", reply_markup=reply_markup)
     await message.answer("✅ Ваше сообщение отправлено администратору!")
     await state.finish()
 
-# ⬇ Админ нажимает "Ответить" → бот запрашивает текст ответа
+# Обработчик для ответа от администратора
 @dp.callback_query_handler(lambda c: c.data.startswith("reply_"))
 async def ask_admin_reply(callback_query: CallbackQuery, state: FSMContext):
     user_id = int(callback_query.data.split("_")[1])  # Получаем ID пользователя
@@ -199,7 +206,7 @@ async def ask_admin_reply(callback_query: CallbackQuery, state: FSMContext):
     await bot.send_message(callback_query.from_user.id, "✏ Введите ваш ответ для пользователя:")
     await ContactAdmin.waiting_for_reply.set()
 
-# ⬇ Админ вводит ответ → бот отправляет его пользователю
+# Обработчик для отправки ответа пользователю
 @dp.message_handler(state=ContactAdmin.waiting_for_reply)
 async def send_reply_to_user(message: types.Message, state: FSMContext):
     data = await state.get_data()
@@ -212,6 +219,7 @@ async def send_reply_to_user(message: types.Message, state: FSMContext):
         await message.answer("❌ Невозможно отправить ответ этому пользователю.")
 
     await state.finish()
+
 @dp.callback_query_handler(lambda c: c.data == 'start')
 async def buttonstart(callback_query: types.CallbackQuery):
     cid = callback_query.message.chat.id
