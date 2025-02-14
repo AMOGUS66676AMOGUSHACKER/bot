@@ -138,18 +138,20 @@ async def start(message: types.Message):
     cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
     result = cursor.fetchall()
 if message.from_user.id == ID:
-    await message.answer('Добро пожаловать!', reply_markup=menu)  # Адмінське меню
+    await message.answer('Добро пожаловать!', reply_markup=menu)  # Меню для адміна
 else:
     cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
     result = cursor.fetchall()
 
-    if not result:  # ⬅ Цей рядок має бути з відступом 4 пробіли
+    if not result:
         cursor.execute('INSERT INTO users (user_id) VALUES (?)', (message.from_user.id,))
         conn.commit()
 
+    cursor.execute('SELECT block FROM users WHERE user_id = ?', (message.from_user.id,))  # ✅ Відступ має бути правильним
+    result = cursor.fetchall()
+
     await message.answer('Добро пожаловать!', reply_markup=panel)  # Меню для юзерів
-        cursor.execute('SELECT block FROM users WHERE user_id = ?', (message.from_user.id,))
-        result = cursor.fetchall()
+
         if result[0][0] != 1:
             cursor.execute('SELECT status FROM users WHERE user_id = ?', (message.from_user.id,))
             status_check = cursor.fetchall()
