@@ -154,7 +154,7 @@ else:
     if result[0][0] != 1:
             cursor.execute('SELECT status FROM users WHERE user_id = ?', (message.from_user.id,))
             status_check = cursor.fetchall()
-            if status_check[0][0] != 'worker':
+    if status_check[0][0] != 'worker':  # ⬅ ще один рівень відступу
                 if " " in message.text and message.text.split()[1].isdigit() == True:
                     cursor.execute(f'UPDATE users SET ref = ? WHERE user_id = ?',
                                    (message.text.split()[1], message.from_user.id,))
