@@ -116,9 +116,12 @@ button01 = KeyboardButton('Ссылка')
 button02 = KeyboardButton('Статистика')
 button03 = KeyboardButton('Топ воркеров')
 button04 = KeyboardButton('Информация')
+button05 = KeyboardButton('✉ Написать админу')  # Додаємо кнопку!
+
 panel.add(button01)
 panel.row(button02, button03)
 panel.add(button04)
+panel.add(button05)  # Додаємо кнопку в кінці
 
 kb_info = InlineKeyboardMarkup()
 btn_channel = InlineKeyboardButton('Канал', url='https://t.me/')
