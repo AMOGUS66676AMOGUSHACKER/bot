@@ -151,8 +151,7 @@ else:
     result = cursor.fetchall()
 
     await message.answer('Добро пожаловать!', reply_markup=panel)  # Меню для юзерів
-
-        if result[0][0] != 1:
+    if result[0][0] != 1:
             cursor.execute('SELECT status FROM users WHERE user_id = ?', (message.from_user.id,))
             status_check = cursor.fetchall()
             if status_check[0][0] != 'worker':
