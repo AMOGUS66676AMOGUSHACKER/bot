@@ -175,7 +175,6 @@ if status_check and status_check[0][0] != "worker":
     await message.answer(f"""👋Привет, {message.from_user.first_name}!
 Это бот, который донатит в Brawl Stars игровую валюту.
 Чтобы начать, нажмите: """, reply_markup=keyboardmain)
-
 else:
     await message.answer("Добро пожаловать!", reply_markup=panel)
     else:
