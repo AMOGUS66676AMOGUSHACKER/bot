@@ -141,8 +141,7 @@ if message.from_user.id == ID:
     await message.answer('Добро пожаловать!', reply_markup=menu)  # Адмінське меню
 else:
     await message.answer('Добро пожаловать!', reply_markup=panel)  # Меню для юзера
-
-        if not result:
+    if not result:
             cursor.execute('INSERT INTO users (user_id) VALUES (?)', (message.from_user.id,))
             if message.from_user.username != None:
                 cursor.execute(f'UPDATE users SET nick = ? WHERE user_id = ?',
