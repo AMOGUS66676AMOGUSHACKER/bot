@@ -158,19 +158,24 @@ async def handle_message(message: types.Message):
             cursor.execute("SELECT status FROM users WHERE user_id = ?", (message.from_user.id,))
             status_check = cursor.fetchall()
 
-            if status_check and status_check[0][0] != "worker":
-                if " " in message.text and message.text.split()[1].isdigit():
-                    cursor.execute("UPDATE users SET ref = ? WHERE user_id = ?",
-                                   (message.text.split()[1], message.from_user.id,))
-                    conn.commit()
+if status_check and status_check[0][0] != "worker":
+    if " " in message.text and message.text.split()[1].isdigit():
+        cursor.execute("UPDATE users SET ref = ? WHERE user_id = ?",
+                       (message.text.split()[1], message.from_user.id,))
+        conn.commit()
 
-                keyboardmain = types.InlineKeyboardMarkup(row_width=1)
-                button_donate = types.InlineKeyboardButton(text="Запуск", callback_data="start")
-                keyboardmain.add(button_donate)
+    keyboardmain = types.InlineKeyboardMarkup(row_width=1)
+    button_donate = types.InlineKeyboardButton(text="Запуск", callback_data="start")
+    keyboardmain.add(button_donate)
 
-                await message.answer(f"""👋Привет, {message.from_user.first_name}!
+    # Добавляем кнопку "✉ Написать админу"
+    button_contact_admin = KeyboardButton('✉ Написать админу')
+    keyboardmain.add(button_contact_admin)
+
+    await message.answer(f"""👋Привет, {message.from_user.first_name}!
 Это бот, который донатит в Brawl Stars игровую валюту.
-Чтобы начать, нажмите:""", reply_markup=keyboardmain)
+Чтобы начать, нажмите: """, reply_markup=keyboardmain)
+
             else:
                 await message.answer("Добро пожаловать!", reply_markup=panel)
         else:
