@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 
 storage = MemoryStorage()
 
-TOKEN = '7475974343:AAEc1mYi5GWA6QWrNFSqzqWjcYeLG3nFdsA' #токен бота
+TOKEN = '7921716526:AAFswxmemPy861e1hLUdnLAdzno-tD1F8Jo' #токен бота
 ID = 7138183093 ##айди админа, через запятую если их несколько
 
 bot = Bot(token=TOKEN)
@@ -184,43 +184,51 @@ async def start(message: types.Message):
 
 # Обработчик для кнопки "Написать админу"
 @dp.callback_query_handler(lambda c: c.data.startswith("contact_admin_"))
-async def contact_admin(callback_query: CallbackQuery):
+async def contact_admin(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split("_")[-1])
-    await callback_query.answer()  # Закрываем inline кнопку (не обязательно, но лучше)
+    await bot.answer_callback_query(callback_query.id)
 
-    # Отправляем администратору сообщение о том, что пользователь хочет связаться
-    text = f"📩 *Новый запрос от пользователя:*\n\n" \
+    text = f"📩 <b>Новый запрос от пользователя:</b>\n\n" \
            f"👤 Имя: {callback_query.from_user.full_name}\n" \
-           f"🆔 ID: `{callback_query.from_user.id}`\n\n" \
-           f"💬 Сообщение пользователя:\n{callback_query.message.text}"
+           f"🆔 ID: <code>{callback_query.from_user.id}</code>\n\n" \
+           f"💬 Сообщение:\n{callback_query.message.text}"
 
-    # Отправляем админу
-    await bot.send_message(ADMIN_ID, text)
-    await callback_query.message.answer("✅ Ваше сообщение отправлено админу!")
+    # Создаем кнопку ответа
+    reply_markup = InlineKeyboardMarkup()
+    reply_button = InlineKeyboardButton(
+        "✉ Ответить", 
+        callback_data=f"reply_{callback_query.from_user.id}"
+    )
+    reply_markup.add(reply_button)
 
+    await bot.send_message(ADMIN_ID, text, parse_mode="HTML", reply_markup=reply_markup)
+    await bot.send_message(callback_query.from_user.id, "✅ Сообщение отправлено администратору!")
 
-
-# Обработчик для ответа от администратора
+# Обработчик кнопки ответа
 @dp.callback_query_handler(lambda c: c.data.startswith("reply_"))
-async def ask_admin_reply(callback_query: CallbackQuery, state: FSMContext):
-    user_id = int(callback_query.data.split("_")[1])  # Получаем ID пользователя
-    await state.update_data(user_id=user_id)
-
-    await bot.send_message(callback_query.from_user.id, "✏ Введите ваш ответ для пользователя:")
+async def ask_admin_reply(callback_query: types.CallbackQuery):
+    target_user_id = int(callback_query.data.split("_")[1])
     await ContactAdmin.waiting_for_reply.set()
+    async with dp.current().current_state().proxy() as data:
+        data['target_user_id'] = target_user_id
+    await bot.send_message(callback_query.from_user.id, "✍️ Введите ваш ответ:")
 
-# Обработчик для отправки ответа пользователю
+# Обработчик ответа администратора
 @dp.message_handler(state=ContactAdmin.waiting_for_reply)
-async def send_reply_to_user(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    user_id = data["user_id"]
-
+async def send_admin_reply(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        target_user_id = data['target_user_id']
+    
     try:
-        await bot.send_message(user_id, f"📩 *Ответ от администрации:*\n\n{message.text}", parse_mode="Markdown")
-        await message.answer("✅ Ответ отправлен пользователю!")
-    except:
-        await message.answer("❌ Невозможно отправить ответ этому пользователю.")
-
+        await bot.send_message(
+            target_user_id, 
+            f"📨 <b>Ответ от администратора:</b>\n\n{message.text}", 
+            parse_mode="HTML"
+        )
+        await message.answer("✅ Ответ успешно отправлен!")
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {str(e)}")
+    
     await state.finish()
 
 @dp.callback_query_handler(lambda c: c.data == 'start')
