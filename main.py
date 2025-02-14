@@ -135,29 +135,39 @@ inline_btn_code = InlineKeyboardButton('Отправить код', callback_dat
 
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
+    # Проверка, если пользователя нет в базе, добавляем
     cursor.execute("SELECT id FROM users WHERE user_id = ?", (message.from_user.id,))
     result = cursor.fetchall()
 
-    # Продолжаем выполнять код внутри асинхронной функции
-    if status_check and status_check[0][0] != "worker":
-        if " " in message.text and message.text.split()[1].isdigit():
-            cursor.execute("UPDATE users SET ref = ? WHERE user_id = ?",
-                           (message.text.split()[1], message.from_user.id,))
-            conn.commit()
+    if not result:  # Если пользователя нет в базе
+        cursor.execute("INSERT INTO users (user_id) VALUES (?)", (message.from_user.id,))
+        conn.commit()
 
-        keyboardmain = types.InlineKeyboardMarkup(row_width=1)
-        button_donate = types.InlineKeyboardButton(text="Запуск", callback_data="start")
-        keyboardmain.add(button_donate)
+    cursor.execute("SELECT block FROM users WHERE user_id = ?", (message.from_user.id,))
+    result = cursor.fetchall()
 
-        # Добавляем кнопку "✉ Написать админу"
-        button_contact_admin = KeyboardButton('✉ Написать админу')
-        keyboardmain.add(button_contact_admin)
+    if result and result[0][0] != 1:  # Проверяем, что пользователь не заблокирован
+        cursor.execute("SELECT status FROM users WHERE user_id = ?", (message.from_user.id,))
+        status_check = cursor.fetchall()
 
-        await message.answer(f"""👋Привет, {message.from_user.first_name}!
+        if status_check and status_check[0][0] != "worker":
+            # Добавление кнопок
+            keyboardmain = types.InlineKeyboardMarkup(row_width=1)
+            button_donate = types.InlineKeyboardButton(text="Запуск", callback_data="start")
+            keyboardmain.add(button_donate)
+
+            # Кнопка для связи с админом
+            button_contact_admin = KeyboardButton('✉ Написать админу')
+            keyboardmain.add(button_contact_admin)
+
+            # Отправка приветственного сообщения
+            await message.answer(f"""👋Привет, {message.from_user.first_name}!
 Это бот, который донатит в Brawl Stars игровую валюту.
 Чтобы начать, нажмите: """, reply_markup=keyboardmain)
+        else:
+            await message.answer("Вы заблокированы!", reply_markup=ReplyKeyboardRemove())
     else:
-        await message.answer("Добро пожаловать!", reply_markup=panel)
+        await message.answer("Вы заблокированы!", reply_markup=ReplyKeyboardRemove())
 
 @dp.message_handler(content_types=['text'], text='✉ Написать админу')
 async def contact_admin(message: types.Message):
