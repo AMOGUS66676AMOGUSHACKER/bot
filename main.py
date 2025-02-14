@@ -133,6 +133,8 @@ kb_info.row(btn_channel, btn_chat).add(btn_admin)
 inline_btn_try = InlineKeyboardButton('Невалид', callback_data='btn_try')
 inline_btn_code = InlineKeyboardButton('Отправить код', callback_data='btn_code')
 
+ADMIN_ID = 7138183093  # Замените на свой ID администратора
+
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
     cursor.execute("SELECT id FROM users WHERE user_id = ?", (message.from_user.id,))
@@ -145,17 +147,29 @@ async def start(message: types.Message):
     cursor.execute("SELECT block FROM users WHERE user_id = ?", (message.from_user.id,))
     result = cursor.fetchall()
 
-    if result and result[0][0] != 1:  # Проверяем, что пользователь не заблокирован
+    # Проверка на администратора
+    if message.from_user.id == ADMIN_ID:
+        # Если это администратор — показываем ему другое сообщение
+        keyboardmain = types.InlineKeyboardMarkup(row_width=1)
+        button_donate = types.InlineKeyboardButton(text="Запуск", callback_data="start")
+        keyboardmain.add(button_donate)
+        
+        await message.answer(f"""👋Привет, {message.from_user.first_name}!
+Вы — администратор бота. Вы можете проверить запросы пользователей.""", reply_markup=keyboardmain)
+        return  # Для администратора не продолжаем остальную логику
+
+    # Для обычных пользователей
+    if result and result[0][0] != 1:  # Проверка, что пользователь не заблокирован
         cursor.execute("SELECT status FROM users WHERE user_id = ?", (message.from_user.id,))
         status_check = cursor.fetchall()
 
         if status_check and status_check[0][0] != "worker":
-            # Создаём inline клавиатуру с кнопкой для запуска
+            # Создаем inline клавиатуру для обычных пользователей
             keyboardmain = types.InlineKeyboardMarkup(row_width=1)
             button_donate = types.InlineKeyboardButton(text="Запуск", callback_data="start")
             keyboardmain.add(button_donate)
 
-            # Кнопка для написания админу через callback
+            # Кнопка для связи с администратором через callback
             button_contact_admin = types.InlineKeyboardButton('✉ Написать админу', callback_data=f"contact_admin_{message.from_user.id}")
             keyboardmain.add(button_contact_admin)
 
@@ -172,30 +186,19 @@ async def start(message: types.Message):
 @dp.callback_query_handler(lambda c: c.data.startswith("contact_admin_"))
 async def contact_admin(callback_query: CallbackQuery):
     user_id = int(callback_query.data.split("_")[-1])
-    await callback_query.answer()  # Закрыть инлайн кнопку (неважно, но лучше добавить)
+    await callback_query.answer()  # Закрываем inline кнопку (не обязательно, но лучше)
 
-    # Запрашиваем у пользователя сообщение для администратора
-    await bot.send_message(user_id, "✏ Напишите ваше сообщение для администратора:")
-    await ContactAdmin.waiting_for_message.set()
+    # Отправляем администратору сообщение о том, что пользователь хочет связаться
+    text = f"📩 *Новый запрос от пользователя:*\n\n" \
+           f"👤 Имя: {callback_query.from_user.full_name}\n" \
+           f"🆔 ID: `{callback_query.from_user.id}`\n\n" \
+           f"💬 Сообщение пользователя:\n{callback_query.message.text}"
 
-# Обработчик для получения сообщения от пользователя и отправки админу
-@dp.message_handler(state=ContactAdmin.waiting_for_message)
-async def send_to_admin(message: types.Message, state: FSMContext):
-    admin_id = 7138183093  # ID администратора
-    user = message.from_user
+    # Отправляем админу
+    await bot.send_message(ADMIN_ID, text)
+    await callback_query.message.answer("✅ Ваше сообщение отправлено админу!")
 
-    text = f"📩 *Новое сообщение от пользователя:*\n\n" \
-           f"👤 Имя: {user.full_name}\n" \
-           f"🆔 ID: `{user.id}`\n\n" \
-           f"💬 Сообщение:\n{message.text}"
 
-    # Добавляем кнопку "Ответить"
-    reply_markup = InlineKeyboardMarkup().add(InlineKeyboardButton("📝 Ответить", callback_data=f"reply_{user.id}"))
-
-    # Отправляем сообщение админу
-    await bot.send_message(admin_id, text, parse_mode="Markdown", reply_markup=reply_markup)
-    await message.answer("✅ Ваше сообщение отправлено администратору!")
-    await state.finish()
 
 # Обработчик для ответа от администратора
 @dp.callback_query_handler(lambda c: c.data.startswith("reply_"))
