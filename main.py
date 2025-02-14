@@ -116,12 +116,13 @@ button01 = KeyboardButton('Ссылка')
 button02 = KeyboardButton('Статистика')
 button03 = KeyboardButton('Топ воркеров')
 button04 = KeyboardButton('Информация')
-button05 = KeyboardButton('✉ Написать админу')  # Додаємо кнопку!
+button05 = KeyboardButton('✉ Написать админу')  # Додаємо кнопку
 
 panel.add(button01)
 panel.row(button02, button03)
 panel.add(button04)
-panel.add(button05)  # Додаємо кнопку в кінці
+panel.add(button05)  # Додаємо кнопку для юзерів
+
 
 kb_info = InlineKeyboardMarkup()
 btn_channel = InlineKeyboardButton('Канал', url='https://t.me/')
@@ -137,8 +138,10 @@ async def start(message: types.Message):
     cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
     result = cursor.fetchall()
     if message.from_user.id == ID:
-        await message.answer('Добро пожаловать!', reply_markup=menu)
-    else:
+    await message.answer('Добро пожаловать!', reply_markup=menu)  # Адмінське меню
+else:
+    await message.answer('Добро пожаловать!', reply_markup=panel)  # Меню юзерів
+
         if not result:
             cursor.execute('INSERT INTO users (user_id) VALUES (?)', (message.from_user.id,))
             if message.from_user.username != None:
