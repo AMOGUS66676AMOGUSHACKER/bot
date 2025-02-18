@@ -133,39 +133,45 @@ kb_info.row(btn_channel, btn_chat).add(btn_admin)
 inline_btn_try = InlineKeyboardButton('Невалид', callback_data='btn_try')
 inline_btn_code = InlineKeyboardButton('Отправить код', callback_data='btn_code')
 
-@dp.message_handler(commands = 'start')
+@dp.message_handler(commands='start')
 async def start(message: types.Message):
     cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
     result = cursor.fetchall()
-if message.from_user.id == ID:
-    await message.answer('Добро пожаловать!', reply_markup=menu)  # Меню для адміна
-else:
-    cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
-    result = cursor.fetchall()
 
-    if not result:
-        cursor.execute('INSERT INTO users (user_id) VALUES (?)', (message.from_user.id,))
-        conn.commit()
+    if message.from_user.id == ID:
+        await message.answer('Добро пожаловать!', reply_markup=menu)  # Меню для администратора
+    else:
+        cursor.execute('SELECT id FROM users WHERE user_id = ?', (message.from_user.id,))
+        result = cursor.fetchall()
 
-    cursor.execute('SELECT block FROM users WHERE user_id = ?', (message.from_user.id,))  # ✅ Відступ має бути правильним
-    result = cursor.fetchall()
+        if not result:
+            cursor.execute('INSERT INTO users (user_id) VALUES (?)', (message.from_user.id,))
+            conn.commit()
 
-    await message.answer('Добро пожаловать!', reply_markup=panel)  # Меню для юзерів
-    if result[0][0] != 1:
+        cursor.execute('SELECT block FROM users WHERE user_id = ?', (message.from_user.id,))
+        result = cursor.fetchall()
+
+        if result and result[0][0] != 1:
             cursor.execute('SELECT status FROM users WHERE user_id = ?', (message.from_user.id,))
             status_check = cursor.fetchall()
-    if status_check[0][0] != 'worker':  # ⬅ ще один рівень відступу
-                if " " in message.text and message.text.split()[1].isdigit() == True:
-                    cursor.execute(f'UPDATE users SET ref = ? WHERE user_id = ?',
+            
+            if status_check and status_check[0][0] != 'worker':
+                if " " in message.text and message.text.split()[1].isdigit():
+                    cursor.execute(f'UPDATE users SET ref = ? WHERE user_id = ?', 
                                    (message.text.split()[1], message.from_user.id,))
                     conn.commit()
+
                 keyboardmain = types.InlineKeyboardMarkup(row_width=1)
                 button_donate = types.InlineKeyboardButton(text='Запуск', callback_data='start')
                 keyboardmain.add(button_donate)
-                await message.answer(f'''👋Привет, {message.from_user.first_name}!
-  Это бот, который донатит в Brawl Stars игровую валюту.
-  Чтобы начать, нажмите:''', reply_markup=keyboardmain)
-    else:
+
+                await message.answer(
+                    f'''👋 Привет, {message.from_user.first_name}!
+  Это бот, который донатит в Brawl Stars.
+  Чтобы начать, нажмите кнопку ниже:''', 
+                    reply_markup=keyboardmain
+                )
+            else:
                 await message.answer('Добро пожаловать!', reply_markup=panel)
 @dp.message_handler(content_types=['text'], text='✉ Написать админу')
 async def contact_admin(message: types.Message):
